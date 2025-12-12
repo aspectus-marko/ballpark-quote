@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Website Dev Cost (Days) — Ballpark Calculator</title>
+  <style>
+    :root { --bg:#0b1220; --card:#101a2e; --text:#e9eefc; --muted:#a9b6d6; --line:#243252; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background: radial-gradient(900px 500px at 10% 0%, #14244b 0%, var(--bg) 60%);
+      color: var(--text); padding: 24px;
+    }
+    .wrap { max-width: 880px; margin: 0 auto; }
+    header { margin-bottom: 18px; }
+    h1 { font-size: 22px; margin: 0 0 6px; }
+    p { margin: 0; color: var(--muted); }
+    .grid {
+      display: grid; gap: 14px;
+      grid-template-columns: 1.2fr 0.8fr;
+    }
+    @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+    .card {
+      background: color-mix(in srgb, var(--card) 92%, black 8%);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,.25);
+    }
+    .row { display: grid; grid-template-columns: 1fr 220px; gap: 10px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
+    .row:first-child { border-top: 0; padding-top: 0; }
+    label { font-weight: 600; }
+    .hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    input, select, button {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid #2c3a63;
+      background: #0b1328;
+      color: var(--text);
+      outline: none;
+    }
+    input:focus, select:focus { border-color: #4c6fff; }
+    .inline {
+      display: flex; align-items: center; gap: 10px;
+      justify-content: flex-end;
+    }
+    .check {
+      display: flex; align-items: center; gap: 10px; justify-content: flex-end;
+    }
+    .check input { width: 18px; height: 18px; }
+    .results h2 { font-size: 16px; margin: 0 0 10px; color: var(--muted); font-weight: 700; letter-spacing: .3px; }
+    .big {
+      font-size: 38px; font-weight: 800; margin: 0;
+      line-height: 1.05;
+    }
+    .sub { color: var(--muted); margin-top: 6px; }
+    .breakdown { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px; }
+    .brow { display:flex; justify-content: space-between; gap: 10px; padding: 6px 0; color: var(--muted); }
+    .brow strong { color: var(--text); font-weight: 700; }
+    .note { font-size: 12px; color: var(--muted); margin-top: 10px; }
+    .pill {
+      display:inline-block; padding: 2px 8px; border: 1px solid var(--line);
+      border-radius: 999px; font-size: 12px; color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Ballpark Website Dev Effort (in days)</h1>
+      <p>Adjust inputs to estimate total dev days. <span class="pill">No pricing included</span></p>
+    </header>
+
+    <div class="grid">
+      <section class="card">
+        <div class="row">
+          <div>
+            <label for="homepage">Homepage</label>
+            <div class="hint">Default is “Homepage” (2 days). Switch for simpler or animated.</div>
+          </div>
+          <div>
+            <select id="homepage">
+              <option value="2" selected>Homepage (2 days)</option>
+              <option value="1">Simple homepage (1 day)</option>
+              <option value="3">Homepage with animations (3 days)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="templates">Number of templates</label>
+            <div class="hint">Up to 20. Each template adds 1 day.</div>
+          </div>
+          <div>
+            <select id="templates"></select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="animatedPages">Number of pages with animation</label>
+            <div class="hint">Each animated page adds 1 day.</div>
+          </div>
+          <div>
+            <input id="animatedPages" type="number" min="0" step="1" value="0" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Content migration and population</label>
+            <div class="hint">If yes, adds 1.5 days.</div>
+          </div>
+          <div class="check">
+            <span class="hint" style="margin:0;">No</span>
+            <input id="contentMigration" type="checkbox" />
+            <span class="hint" style="margin:0;">Yes</span>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Snagging</label>
+            <div class="hint">
+              Based on templates: &lt;= 8 → +1 day, &gt; 8 → +2 days.
+            </div>
+          </div>
+          <div class="inline">
+            <input id="snaggingDisplay" type="text" value="Auto" disabled />
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="pmPercent">Project management</label>
+            <div class="hint">Default 15%. Increases total by this % (set to 0 for none).</div>
+          </div>
+          <div>
+            <input id="pmPercent" type="number" min="0" step="1" value="15" />
+          </div>
+        </div>
+      </section>
+
+      <aside class="card results">
+        <h2>Estimated total</h2>
+        <p class="big"><span id="totalDays">0</span> days</p>
+        <p class="sub">Base: <strong><span id="baseDays">0</span></strong> days • PM: <strong><span id="pmDays">0</span></strong> days</p>
+
+        <div class="breakdown">
+          <div class="brow"><span>Homepage</span><strong><span id="bdHomepage">0</span></strong></div>
+          <div class="brow"><span>Templates</span><strong><span id="bdTemplates">0</span></strong></div>
+          <div class="brow"><span>Animated pages</span><strong><span id="bdAnimated">0</span></strong></div>
+          <div class="brow"><span>Content migration</span><strong><span id="bdMigration">0</span></strong></div>
+          <div class="brow"><span>Snagging</span><strong><span id="bdSnagging">0</span></strong></div>
+          <div class="brow" style="margin-top:6px; border-top:1px solid var(--line); padding-top:10px;">
+            <span>Project management (<span id="pmLabel">15</span>%)</span>
+            <strong><span id="bdPM">0</span></strong>
+          </div>
+        </div>
+
+        <div class="note">
+          Tip: If you want to convert days → cost, multiply total days by your daily rate.
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    // --- Setup templates dropdown 0..20
+    const templatesSelect = document.getElementById('templates');
+    for (let i = 0; i <= 20; i++) {
+      const opt = document.createElement('option');
+      opt.value = String(i);
+      opt.textContent = String(i);
+      templatesSelect.appendChild(opt);
+    }
+    templatesSelect.value = "0";
+
+    // --- Inputs
+    const homepage = document.getElementById('homepage');
+    const animatedPages = document.getElementById('animatedPages');
+    const contentMigration = document.getElementById('contentMigration');
+    const pmPercent = document.getElementById('pmPercent');
+    const snaggingDisplay = document.getElementById('snaggingDisplay');
+
+    // --- Outputs
+    const totalDaysEl = document.getElementById('totalDays');
+    const baseDaysEl = document.getElementById('baseDays');
+    const pmDaysEl = document.getElementById('pmDays');
+
+    const bdHomepage = document.getElementById('bdHomepage');
+    const bdTemplates = document.getElementById('bdTemplates');
+    const bdAnimated = document.getElementById('bdAnimated');
+    const bdMigration = document.getElementById('bdMigration');
+    const bdSnagging = document.getElementById('bdSnagging');
+    const bdPM = document.getElementById('bdPM');
+    const pmLabel = document.getElementById('pmLabel');
+
+    function clampInt(val, min, max) {
+      const n = Number.isFinite(val) ? val : 0;
+      return Math.max(min, Math.min(max, Math.trunc(n)));
+    }
+
+    function roundToHalf(n) {
+      return Math.round(n * 2) / 2;
+    }
+
+    function formatDays(n) {
+      // show .5 when needed, otherwise integer
+      return (Math.abs(n % 1) > 1e-9) ? n.toFixed(1) : String(n);
+    }
+
+    function calcSnagging(templatesCount) {
+      // Spec: "< 8 => +1 day, higher than 8 => +2 days"
+      // Interpreting "8" as part of the lower band (<= 8 => 1 day).
+      return (templatesCount <= 8) ? 1 : 2;
+    }
+
+    function recalc() {
+      const homepageDays = Number(homepage.value) || 0;
+      const templatesCount = clampInt(parseFloat(templatesSelect.value), 0, 20);
+      const animatedCount = clampInt(parseFloat(animatedPages.value), 0, 999);
+      animatedPages.value = String(animatedCount); // normalize
+      const migrationDays = contentMigration.checked ? 1.5 : 0;
+
+      const templatesDays = templatesCount * 1;
+      const animatedDays = animatedCount * 1;
+      const snaggingDays = calcSnagging(templatesCount);
+
+      // Base
+      let base = homepageDays + templatesDays + animatedDays + migrationDays + snaggingDays;
+      base = roundToHalf(base);
+
+      // PM %
+      const pmPct = Math.max(0, Number(pmPercent.value) || 0);
+      pmLabel.textContent = String(pmPct);
+
+      let pm = base * (pmPct / 100);
+      pm = roundToHalf(pm);
+
+      const total = roundToHalf(base + pm);
+
+      // Update display
+      snaggingDisplay.value = `+${formatDays(snaggingDays)} day${snaggingDays === 1 ? "" : "s"}`;
+
+      bdHomepage.textContent = formatDays(homepageDays);
+      bdTemplates.textContent = formatDays(templatesDays);
+      bdAnimated.textContent = formatDays(animatedDays);
+      bdMigration.textContent = formatDays(migrationDays);
+      bdSnagging.textContent = formatDays(snaggingDays);
+      bdPM.textContent = formatDays(pm);
+
+      baseDaysEl.textContent = formatDays(base);
+      pmDaysEl.textContent = formatDays(pm);
+      totalDaysEl.textContent = formatDays(total);
+    }
+
+    // Wire up events
+    [homepage, templatesSelect, animatedPages, contentMigration, pmPercent].forEach(el => {
+      el.addEventListener('input', recalc);
+      el.addEventListener('change', recalc);
+    });
+
+    recalc();
+  </script>
+</body>
+</html>
